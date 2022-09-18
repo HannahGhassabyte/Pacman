@@ -114,7 +114,6 @@ class Game:
     # Driver method: The games primary update method
     def update(self):
         # pygame.image.unload()
-        print(self.ghostStates)
         if self.gameOver:
             self.gameOverFunc()
             return
@@ -396,7 +395,6 @@ class Game:
 
     def drawBerry(self):
         if self.levelTimer in range(self.berryState[0], self.berryState[1]) and not self.berryState[2]:
-            # print("here")
             berryImage = pygame.image.load(ElementPath + self.berries[(self.level - 1) % 8])
             berryImage = pygame.transform.scale(berryImage, (int(square * spriteRatio), int(square * spriteRatio)))
             screen.blit(berryImage, (self.berryLocation[1] * square, self.berryLocation[0] * square, square, square))
@@ -425,7 +423,6 @@ class Game:
             running = False
             self.recordHighScore()
             return
-
         # Resets the screen around pacman
         self.drawTilesAround(self.pacman.row, self.pacman.col)
 
@@ -435,7 +432,8 @@ class Game:
         screen.blit(pacmanImage, (self.pacman.col * square + spriteOffset, self.pacman.row * square + spriteOffset, square, square))
         pygame.display.update()
         pause(5000000)
-        self.gameOverCounter += 1
+        self.gameOverCounter += 1;
+
 
     def displayLives(self):
         # 33 rows || 28 cols
@@ -943,13 +941,13 @@ def displayLaunchScreen():
         platform = pygame.transform.scale(platform, (int(square * 2), int(square * 2)))
         screen.blit(platform, ((i * 2) * square, 26 * square, square, square))
     # Credit myself
-    credit = ["tile003.png", "tile004.png", "tile022.png", "tile008.png", "tile013.png", "tile015.png", "tile011.png", "tile004.png", "tile000.png", "tile012.png", "tile025.png", "tile015.png", "tile418.png", "tile416.png", "tile418.png", "tile416.png"]
+    credit = ["tile007.png", "tile000.png", "tile013.png", "tile013.png", "tile000.png", "tile007.png", "tile015.png", "tile006.png", "tile007.png", "tile000.png", "tile019.png", "tile019.png", "tile000.png", "tile001.png", "tile004.png", "tile007.png"]
     for i in range(len(credit)):
         letter = pygame.image.load(TextPath + credit[i])
         letter = pygame.transform.scale(letter, (int(square), int(square)))
         screen.blit(letter, ((6 + i) * square, 30 * square, square, square))
-    # Press Space to Play
-    instructions = ["tile016.png", "tile018.png", "tile004.png", "tile019.png", "tile019.png", "tile015.png", "tile019.png", "tile016.png", "tile000.png", "tile002.png", "tile004.png", "tile015.png", "tile020.png", "tile014.png", "tile015.png", "tile016.png", "tile011.png", "tile000.png", "tile025.png"]
+    # Press Green to Play
+    instructions = ["tile016.png", "tile018.png", "tile004.png", "tile019.png", "tile019.png", "tile015.png", "tile006.png", "tile018.png", "tile004.png", "tile004.png", "tile013.png", "tile015.png", "tile020.png", "tile014.png", "tile015.png", "tile016.png", "tile011.png", "tile000.png", "tile025.png"]
     for i in range(len(instructions)):
         letter = pygame.image.load(TextPath + instructions[i])
         letter = pygame.transform.scale(letter, (int(square), int(square)))
@@ -957,47 +955,56 @@ def displayLaunchScreen():
 
     pygame.display.update()
 
-running = True
-onLaunchScreen = True
-displayLaunchScreen()
 
 def pause(time):
     cur = 0
     while not cur == time:
         cur += 1
 
-while running:
-    for event in pygame.event.get():
+while True:
+    for event in pygame.event.get ():
         if event.type == pygame.QUIT:
-            running = False
-            game.recordHighScore()
-        elif event.type == pygame.KEYDOWN:
-            game.paused = False
-            game.started = True
-            if event.key == pygame.K_w:
-                if not onLaunchScreen:
-                    game.pacman.newDir = 0
-            elif event.key == pygame.K_d:
-                if not onLaunchScreen:
-                    game.pacman.newDir = 1
-            elif event.key == pygame.K_s:
-                if not onLaunchScreen:
-                    game.pacman.newDir = 2
-            elif event.key == pygame.K_a:
-                if not onLaunchScreen:
-                    game.pacman.newDir = 3
-            elif event.key == pygame.K_SPACE:
-                if onLaunchScreen:
-                    onLaunchScreen = False
-                    game.paused = True
-                    game.started = False
-                    game.render()
-                    pygame.mixer.music.load(MusicPath + "pacman_beginning.wav")
-                    pygame.mixer.music.play()
-                    musicPlaying = 1
-            elif event.key == pygame.K_q:
-                running = False
+            game.recordHighScore ()
+            exit()
+    onLaunchScreen = True
+    game.__init__(1, 0)
+    screen.fill((0, 0, 0))
+    pygame.display.update()
+    displayLaunchScreen()
+    gameBoard = copy.deepcopy(originalGameBoard)
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 game.recordHighScore()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                game.paused = False
+                game.started = True
+                if event.key == pygame.K_w:
+                    if not onLaunchScreen:
+                        game.pacman.newDir = 0
+                elif event.key == pygame.K_d:
+                    if not onLaunchScreen:
+                        game.pacman.newDir = 1
+                elif event.key == pygame.K_s:
+                    if not onLaunchScreen:
+                        game.pacman.newDir = 2
+                elif event.key == pygame.K_a:
+                    if not onLaunchScreen:
+                        game.pacman.newDir = 3
+                elif event.key == pygame.K_SPACE:
+                    if onLaunchScreen:
+                        onLaunchScreen = False
+                        game.paused = True
+                        game.started = False
+                        game.render()
+                        pygame.mixer.music.load(MusicPath + "pacman_beginning.wav")
+                        pygame.mixer.music.play()
+                        musicPlaying = 1
+                elif event.key == pygame.K_q:
+                    running = False
+                    game.recordHighScore()
 
-    if not onLaunchScreen:
-        game.update()
+        if not onLaunchScreen:
+            game.update()
