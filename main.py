@@ -4,6 +4,7 @@ from random import randrange
 import random
 import copy
 import config
+import GPIO
 
 BoardPath = "Assets/BoardImages/"
 ElementPath = "Assets/ElementImages/"
@@ -13,7 +14,8 @@ MusicPath = "Assets/Music/"
 
 pygame.mixer.init()
 pygame.init()
-print(pygame.mixer.music.get_busy())
+GPIO.intialization()
+GPIO.startLCD()
 
 # 28 Across 31 Tall 1: Empty Space 2: Tic-Tak 3: Wall 4: Ghost safe-space 5: Special Tic-Tak
 originalGameBoard = [
@@ -975,27 +977,30 @@ while True:
     displayLaunchScreen()
     gameBoard = copy.deepcopy(originalGameBoard)
     running = True
+    count = 0
     while running:
+        count = GPIO.buttonWaitingPattern(count)
+        GPIO.updateLCD()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game.recordHighScore()
                 exit()
-            elif event.type == pygame.KEYDOWN:
+            elif event.type == GPIO.isButtonPressed():
                 game.paused = False
                 game.started = True
-                if event.key == pygame.K_w:
+                if event.key == GPIO.isUpPressed():
                     if not onLaunchScreen:
                         game.pacman.newDir = 0
-                elif event.key == pygame.K_d:
+                elif event.key == GPIO.isRightPressed():
                     if not onLaunchScreen:
                         game.pacman.newDir = 1
-                elif event.key == pygame.K_s:
+                elif event.key == GPIO.isDownPressed():
                     if not onLaunchScreen:
                         game.pacman.newDir = 2
-                elif event.key == pygame.K_a:
+                elif event.key == GPIO.isLeftPressed():
                     if not onLaunchScreen:
                         game.pacman.newDir = 3
-                elif event.key == pygame.K_SPACE:
+                elif event.key == GPIO.isGreenPressed():
                     if onLaunchScreen:
                         onLaunchScreen = False
                         game.paused = True
@@ -1004,7 +1009,7 @@ while True:
                         pygame.mixer.music.load(MusicPath + "pacman_beginning.wav")
                         pygame.mixer.music.play()
                         musicPlaying = 1
-                elif event.key == pygame.K_q:
+                elif event.key == pygame.K_q: #maybe connect to GPIO later
                     running = False
                     game.recordHighScore()
 
