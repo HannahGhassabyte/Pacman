@@ -1009,7 +1009,7 @@ while True:
                         pygame.mixer.music.load(MusicPath + "pacman_beginning.wav")
                         pygame.mixer.music.play()
                         musicPlaying = 1
-                elif event.key == pygame.K_q: #maybe connect to GPIO later
+                elif event.key == GPIO.isRedPressed():
                     running = False
                     game.recordHighScore()
 
