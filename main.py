@@ -979,39 +979,39 @@ while True:
     running = True
     count = 0
     while running:
-        count = GPIO.buttonWaitingPattern(count)
         GPIO.updateLCD()
+        if onLaunchScreen:
+            count = GPIO.buttonWaitingPattern(count)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game.recordHighScore()
                 exit()
-            elif event.type == GPIO.isButtonPressed():
-                game.paused = False
-                game.started = True
-                if event.key == GPIO.isUpPressed():
-                    if not onLaunchScreen:
-                        game.pacman.newDir = 0
-                elif event.key == GPIO.isRightPressed():
-                    if not onLaunchScreen:
-                        game.pacman.newDir = 1
-                elif event.key == GPIO.isDownPressed():
-                    if not onLaunchScreen:
-                        game.pacman.newDir = 2
-                elif event.key == GPIO.isLeftPressed():
-                    if not onLaunchScreen:
-                        game.pacman.newDir = 3
-                elif event.key == GPIO.isGreenPressed():
-                    if onLaunchScreen:
-                        onLaunchScreen = False
-                        game.paused = True
-                        game.started = False
-                        game.render()
-                        pygame.mixer.music.load(MusicPath + "pacman_beginning.wav")
-                        pygame.mixer.music.play()
-                        musicPlaying = 1
-                elif event.key == GPIO.isRedPressed():
-                    running = False
-                    game.recordHighScore()
-
+        if GPIO.isButtonPressed():
+            game.paused = False
+            game.started = True
+        elif GPIO.isUpPressed():
+            if not onLaunchScreen:
+                game.pacman.newDir = 0
+        elif GPIO.isRightPressed():
+            if not onLaunchScreen:
+                game.pacman.newDir = 1
+        elif GPIO.isDownPressed():
+            if not onLaunchScreen:
+                game.pacman.newDir = 2
+        elif GPIO.isLeftPressed():
+            if not onLaunchScreen:
+                game.pacman.newDir = 3
+        elif GPIO.isGreenPressed():
+            if onLaunchScreen:
+                onLaunchScreen = False
+                game.paused = True
+                game.started = False
+                game.render()
+                pygame.mixer.music.load(MusicPath + "pacman_beginning.wav")
+                pygame.mixer.music.play()
+                musicPlaying = 1
+        elif event.key == GPIO.isRedPressed():
+            running = False
+            game.recordHighScore()
         if not onLaunchScreen:
             game.update()

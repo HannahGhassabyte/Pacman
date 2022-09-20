@@ -6,7 +6,6 @@ import config
 cols = 16
 i2c_expander = 'PCF8574'
 address = 0x27
-lcd = None
 
 
 def startLCD():
@@ -17,7 +16,7 @@ def startLCD():
 
 
 def updateLCD():  # should be within main game loop
-    # Write a string on first line and move to next line
+    lcd = CharLCD (i2c_expander, address)
     padding = ' ' * cols
     string = "BEAT THE HIGH SCORE " + str (config.g_highscore)
     string_padded = padding + string + padding
