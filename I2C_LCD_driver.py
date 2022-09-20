@@ -1,19 +1,16 @@
-# Import LCD library
-from RPLCD.i2c import CharLCD
 
-# Import sleep library
-import time 
+from RPLCD.i2c import CharLCD
+import time
+import config
 
 # constants to initialise the LCD
 lcdmode = 'i2c'
 cols = 16
 rows = 2
-charmap = 'A00'
 i2c_expander = 'PCF8574'
 address = 0x27
 port = 1
 
-high_score= 11111
 
 # Initialise the LCD
 lcd = CharLCD(i2c_expander, address)
@@ -23,7 +20,7 @@ lcd.write_string("PACMAN")
 while True:
     # Write a string on first line and move to next line
     padding=' '*cols
-    string = "BEAT THE HIGH SCORE "+str(high_score) 
+    string = "BEAT THE HIGH SCORE "+str(config.g_highscore)
     string_padded = padding+string+padding
     for i in range(len(string_padded) - cols + 1):
         lcd.home()

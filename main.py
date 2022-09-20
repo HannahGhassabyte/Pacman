@@ -3,7 +3,7 @@ import math
 from random import randrange
 import random
 import copy
-import os
+import config
 
 BoardPath = "Assets/BoardImages/"
 ElementPath = "Assets/ElementImages/"
@@ -541,6 +541,7 @@ class Game:
         file = open(DataPath + "HighScore.txt", "w+")
         file.write(str(self.highScore))
         file.close()
+        config.g_highscore = str(game.getHighScore())
 
 class Pacman:
     def __init__(self, row, col):
@@ -965,6 +966,7 @@ while True:
     for event in pygame.event.get ():
         if event.type == pygame.QUIT:
             game.recordHighScore ()
+            g_highscore = str (game.getHighScore ())
             exit()
     onLaunchScreen = True
     game.__init__(1, 0)
