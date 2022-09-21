@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 from RPLCD.i2c import CharLCD
 import time
 import config
+import pygame
 
 cols = 16
 i2c_expander = 'PCF8574'
@@ -51,47 +52,6 @@ def intialization():
     GPIO.setup (9, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
-def isButtonPressed():
-    if (isUpPressed () or isDownPressed () or isRightPressed () or isLeftPressed ()
-            or isRedPressed () or isLeftPressed ()):
-        return True
-    return False
-
-
-def isUpPressed():
-    if GPIO.input (21):
-        GPIO.output (20, GPIO.HIGH)
-        return True
-    else:
-        GPIO.output (20, GPIO.LOW)
-        return False
-
-
-def isDownPressed():
-    if GPIO.input (26):
-        GPIO.output (19, GPIO.HIGH)
-        return True
-    else:
-        GPIO.output (19, GPIO.LOW)
-        return False
-
-
-def isRightPressed():
-    if GPIO.input (16):
-        GPIO.output (13, GPIO.HIGH)
-        return True
-    else:
-        GPIO.output (13, GPIO.LOW)
-        return False
-
-
-def isLeftPressed():
-    if GPIO.input (6):
-        GPIO.output (12, GPIO.HIGH)
-        return True
-    else:
-        GPIO.output (12, GPIO.LOW)
-        return True
 
 
 def isRedPressed():
@@ -102,12 +62,6 @@ def isRedPressed():
         GPIO.output (25, GPIO.LOW)
         return False
 
-
-def isGreenPressed():
-    if GPIO.input (5):
-        GPIO.output (11, GPIO.HIGH)
-    else:
-        GPIO.output (11, GPIO.LOW)
 
 
 def buttonWaitingPattern(count):
