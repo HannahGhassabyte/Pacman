@@ -13,7 +13,6 @@ BoardPath = "Assets/BoardImages/"
 ElementPath = "Assets/ElementImages/"
 TextPath = "Assets/TextImages/"
 DataPath = "Assets/Data/"
-MusicPath = "Assets/Music/"
 
 #pygame.mixer.init ()
 pygame.init ()
@@ -65,9 +64,7 @@ spriteOffset = square * (1 - spriteRatio) * (1 / 2)
 (width, height) = (len (gameBoard[0]) * square, len (gameBoard) * square)  # Game screen
 screen = pygame.display.set_mode ((width, height))
 pygame.display.flip ()
-# pelletColor = (165, 93, 53)
 pelletColor = (222, 161, 133)
-musicPlaying = 0
 class Game:
     def __init__(self, level, score):
         self.paused = True
@@ -141,7 +138,6 @@ class Game:
         if self.score >= 10000 and not self.extraLifeGiven:
             self.lives += 1
             self.extraLifeGiven = True
-            self.forcePlayMusic ("pacman_extrapac.wav")
 
         # Draw tiles around ghosts and pacman
         self.clearBoard ()
@@ -185,7 +181,6 @@ class Game:
             self.pacman.col %= len (gameBoard[0])
             if self.pacman.row % 1.0 == 0 and self.pacman.col % 1.0 == 0:
                 if gameBoard[int (self.pacman.row)][int (self.pacman.col)] == 2:
-                    self.playMusic ("munch_1.wav")
                     gameBoard[int (self.pacman.row)][int (self.pacman.col)] = 1
                     self.score += 10
                     self.collected += 1
@@ -194,7 +189,6 @@ class Game:
                                       (int(self.pacman.col * square), int(self.pacman.row * square), int(square), int(square)))
                 elif gameBoard[int (self.pacman.row)][int (self.pacman.col)] == 5 or gameBoard[int (self.pacman.row)][
                     int (self.pacman.col)] == 6:
-                    self.forcePlayMusic ("power_pellet.wav")
                     gameBoard[int (self.pacman.row)][int (self.pacman.col)] = 1
                     self.collected += 1
                     # Fill tile with black
@@ -213,7 +207,6 @@ class Game:
         global running
         if self.collected == self.total:
             print ("New Level")
-            self.forcePlayMusic ("intermission.wav")
             self.level += 1
             self.newLevel ()
 
@@ -290,29 +283,6 @@ class Game:
         # Updates the screen
         pygame.display.update ()
 
-    def playMusic(self, music):
-        return False # Uncomment to disable music
-        if not pygame.mixer.music.get_busy ():
-            #pygame.mixer.music.unload ()
-            pygame.mixer.music.load (MusicPath + music)
-            pygame.mixer.music.queue (MusicPath + music)
-            pygame.mixer.music.play ()
-            global musicPlaying
-            if music == "munch_1.wav":
-                musicPlaying = 0
-            elif music == "siren_1.wav":
-                musicPlaying = 2
-            else:
-                musicPlaying = 1
-
-    def forcePlayMusic(self, music):
-        # return False # Uncomment to disable music
-        #pygame.mixer.music.unload ()
-        pygame.mixer.music.load (MusicPath + music)
-        pygame.mixer.music.play ()
-        global musicPlaying
-        musicPlaying = 1
-
     def clearBoard(self):
         # Draw tiles around ghosts and pacman
         for ghost in self.ghosts:
@@ -332,7 +302,6 @@ class Game:
             if self.touchingPacman (ghost.row, ghost.col) and not ghost.attacked:
                 if self.lives == 1:
                     print ("You lose")
-                    self.forcePlayMusic ("death_1.wav")
                     self.gameOver = True
                     # Removes the ghosts from the screen
                     for ghost in self.ghosts:
@@ -343,7 +312,6 @@ class Game:
                     pause (10000000)
                     return
                 self.started = False
-                self.forcePlayMusic ("pacman_death.wav")
                 reset ()
             elif self.touchingPacman (ghost.row, ghost.col) and ghost.isAttacked () and not ghost.isDead ():
                 ghost.setDead (True)
@@ -354,7 +322,6 @@ class Game:
                 self.score += self.ghostScore
                 self.points.append ([ghost.row, ghost.col, self.ghostScore, 0])
                 self.ghostScore *= 2
-                self.forcePlayMusic ("eat_ghost.wav")
                 pause (10000000)
         if self.touchingPacman (self.berryLocation[0], self.berryLocation[1]) and not self.berryState[
             2] and self.levelTimer in range (self.berryState[0], self.berryState[1]):
@@ -362,7 +329,6 @@ class Game:
             self.score += self.berryScore
             self.points.append ([self.berryLocation[0], self.berryLocation[1], self.berryScore, 0])
             self.berriesCollected.append (self.berries[(self.level - 1) % 8])
-            self.forcePlayMusic ("eat_fruit.wav")
 
     # Displays the current score
     def displayScore(self):
@@ -443,7 +409,7 @@ class Game:
         pacmanImage = pygame.image.load (ElementPath + "tile" + str (116 + self.gameOverCounter) + ".png").convert()
         pacmanImage = pygame.transform.scale (pacmanImage, (int (square * spriteRatio), int (square * spriteRatio)))
         screen.blit (pacmanImage,
-                     (self.pacman.col * square + spriteOffset, self.pacman.row * square + spriteOffset, square, square))
+                     (int(self.pacman.col * square + spriteOffset), int(self.pacman.row * square + spriteOffset), int(square), int(square)))
         pygame.display.update ()
         pause (5000000)
         self.gameOverCounter += 1;
@@ -1017,11 +983,6 @@ def greenPressed(channel):
             game.paused = True
             game.started = False
             game.render()
-            pygame.mixer.music.load(MusicPath + "pacman_beginning.wav")
-            pygame.mixer.music.play()
-            global musicPlaying
-            musicPlaying = 1
-        else:
             game.paused = False
             game.started = True
     else:
@@ -1085,17 +1046,6 @@ GPIO.add_event_detect(9, GPIO.BOTH, callback=redPressed, bouncetime=50)
 
 pygame.event.set_allowed([pygame.QUIT])
 
-cols = 16
-i2c_expander = 'PCF8574'
-address = 0x27
-lcd = CharLCD (i2c_expander, address)
-lcd.cursor_pos = (0, 5)
-lcd.write_string ("PACMAN")
-padding = ' ' * cols
-string = "BEAT THE HIGH SCORE " + str (config.g_highscore)
-string_padded = padding + string + padding
-count_string_max= len(string_padded)-cols+1
-
 while 1:
     for event in pygame.event.get ():
         if event.type == pygame.QUIT:
@@ -1109,6 +1059,16 @@ while 1:
     gameBoard = copy.deepcopy (originalGameBoard)
     count = 0
     count_string = 0
+    cols = 16
+    i2c_expander = 'PCF8574'
+    address = 0x27
+    lcd = CharLCD (i2c_expander, address)
+    lcd.cursor_pos = (0, 5)
+    lcd.write_string ("PACMAN")
+    padding = ' ' * cols
+    string = "BEAT THE HIGH SCORE " + str (game.getHighScore ())
+    string_padded = padding + string + padding
+    count_string_max = len (string_padded) - cols + 1
     while game.running:
         if count_string == count_string_max:
             count_string=0
