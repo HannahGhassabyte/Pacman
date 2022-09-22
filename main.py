@@ -5,8 +5,9 @@ import random
 import copy
 import config
 import IO
-import signal
 import RPi.GPIO as GPIO
+from RPLCD.i2c import CharLCD
+import time
 
 BoardPath = "Assets/BoardImages/"
 ElementPath = "Assets/ElementImages/"
@@ -14,7 +15,7 @@ TextPath = "Assets/TextImages/"
 DataPath = "Assets/Data/"
 MusicPath = "Assets/Music/"
 
-pygame.mixer.init ()
+#pygame.mixer.init ()
 pygame.init ()
 IO.intialization ()
 
@@ -190,7 +191,7 @@ class Game:
                     self.collected += 1
                     # Fill tile with black
                     pygame.draw.rect (screen, (0, 0, 0),
-                                      (self.pacman.col * square, self.pacman.row * square, square, square))
+                                      (int(self.pacman.col * square), int(self.pacman.row * square), int(square), int(square)))
                 elif gameBoard[int (self.pacman.row)][int (self.pacman.col)] == 5 or gameBoard[int (self.pacman.row)][
                     int (self.pacman.col)] == 6:
                     self.forcePlayMusic ("power_pellet.wav")
@@ -290,7 +291,7 @@ class Game:
         pygame.display.update ()
 
     def playMusic(self, music):
-        # return False # Uncomment to disable music
+        return False # Uncomment to disable music
         if not pygame.mixer.music.get_busy ():
             #pygame.mixer.music.unload ()
             pygame.mixer.music.load (MusicPath + music)
@@ -374,7 +375,7 @@ class Game:
         for i in range (scoreStart, scoreStart + len (textOneUp)):
             tileImage = pygame.image.load (TextPath + textOneUp[index]).convert()
             tileImage = pygame.transform.scale (tileImage, (square, square))
-            screen.blit (tileImage, (i * square, 4, square, square))
+            screen.blit (tileImage, (int(i * square), int(4), int(square), int(square)))
             index += 1
         score = str (self.score)
         if score == "0":
@@ -384,14 +385,14 @@ class Game:
             digit = int (score[i])
             tileImage = pygame.image.load (TextPath + "tile0" + str (32 + digit) + ".png").convert()
             tileImage = pygame.transform.scale (tileImage, (square, square))
-            screen.blit (tileImage, ((scoreStart + 2 + index) * square, square + 4, square, square))
+            screen.blit (tileImage, (int((scoreStart + 2 + index) * square), int(square + 4), int(square), int(square)))
             index += 1
 
         index = 0
         for i in range (highScoreStart, highScoreStart + len (textHighScore)):
             tileImage = pygame.image.load (TextPath + textHighScore[index]).convert()
             tileImage = pygame.transform.scale (tileImage, (square, square))
-            screen.blit (tileImage, (i * square, 4, square, square))
+            screen.blit (tileImage, (int(i * square),int(4), int(square), int(square)))
             index += 1
 
         highScore = str (self.highScore)
@@ -402,14 +403,14 @@ class Game:
             digit = int (highScore[i])
             tileImage = pygame.image.load (TextPath + "tile0" + str (32 + digit) + ".png").convert()
             tileImage = pygame.transform.scale (tileImage, (square, square))
-            screen.blit (tileImage, ((highScoreStart + 6 + index) * square, square + 4, square, square))
+            screen.blit (tileImage, (int((highScoreStart + 6 + index) * square), int(square + 4), int(square), int(square)))
             index += 1
 
     def drawBerry(self):
         if self.levelTimer in range (self.berryState[0], self.berryState[1]) and not self.berryState[2]:
             berryImage = pygame.image.load (ElementPath + self.berries[(self.level - 1) % 8]).convert()
             berryImage = pygame.transform.scale (berryImage, (int (square * spriteRatio), int (square * spriteRatio)))
-            screen.blit (berryImage, (self.berryLocation[1] * square, self.berryLocation[0] * square, square, square))
+            screen.blit (berryImage, (int(self.berryLocation[1] * square), int(self.berryLocation[0] * square),int(square), int(square)))
 
     def drawPoints(self, points, row, col):
         pointStr = str (points)
@@ -454,7 +455,8 @@ class Game:
         for i in range (self.lives - 1):
             lifeImage = pygame.image.load (ElementPath + "tile054.png").convert()
             lifeImage = pygame.transform.scale (lifeImage, (int (square * spriteRatio), int (square * spriteRatio)))
-            screen.blit (lifeImage, (livesLoc[i][1] * square, livesLoc[i][0] * square - spriteOffset, square, square))
+            screen.blit (lifeImage, (int(livesLoc[i][1] * square), int(livesLoc[i][0] * square) - int(spriteOffset),
+                                     int(square), int(square)))
 
     def displayBerries(self):
         firstBerrie = [34, 26]
@@ -614,7 +616,7 @@ class Pacman:
             pacmanImage = pygame.image.load (ElementPath + "tile112.png").convert()
             pacmanImage = pygame.transform.scale (pacmanImage, (int (square * spriteRatio), int (square * spriteRatio)))
             screen.blit (pacmanImage,
-                         (self.col * square + spriteOffset, self.row * square + spriteOffset, square, square))
+                         (int(self.col * square + spriteOffset), int(self.row * square + spriteOffset), int(square), int(square)))
             return
 
         if self.mouthChangeCount == self.mouthChangeDelay:
@@ -644,7 +646,7 @@ class Pacman:
                 pacmanImage = pygame.image.load (ElementPath + "tile050.png").convert()
 
         pacmanImage = pygame.transform.scale (pacmanImage, (int (square * spriteRatio), int (square * spriteRatio)))
-        screen.blit (pacmanImage, (self.col * square + spriteOffset, self.row * square + spriteOffset, square, square))
+        screen.blit (pacmanImage, (int(self.col * square + spriteOffset), int(self.row * square + spriteOffset), int(square), int(square)))
 
 
 class Ghost:
@@ -736,7 +738,7 @@ class Ghost:
                     ghostImage = pygame.image.load (ElementPath + "tile" + str (tileNum) + ".png").convert()
 
         ghostImage = pygame.transform.scale (ghostImage, (int (square * spriteRatio), int (square * spriteRatio)))
-        screen.blit (ghostImage, (self.col * square + spriteOffset, self.row * square + spriteOffset, square, square))
+        screen.blit (ghostImage, (int(self.col * square + spriteOffset), int(self.row * square + spriteOffset), int(square), int(square)))
 
     def isValidTwo(self, cRow, cCol, dist, visited):
         if cRow < 3 or cRow >= len (gameBoard) - 5 or cCol < 0 or cCol >= len (gameBoard[0]) or gameBoard[cRow][
@@ -1071,7 +1073,7 @@ def redPressed(channel):
         game.running = False
         game.recordHighScore()
     else:
-        GPIO.outpu(25, GPIO.LOW)
+        GPIO.output(25, GPIO.LOW)
 
 
 GPIO.add_event_detect(5, GPIO.BOTH, callback=greenPressed, bouncetime=50)
@@ -1079,28 +1081,48 @@ GPIO.add_event_detect(21, GPIO.BOTH, callback=upPressed, bouncetime=50)
 GPIO.add_event_detect(26, GPIO.BOTH, callback=downPressed, bouncetime=50)
 GPIO.add_event_detect(16, GPIO.BOTH, callback=rightPressed, bouncetime=50)
 GPIO.add_event_detect(6, GPIO.BOTH, callback=leftPressed, bouncetime=50)
-GPIO.add_event_detect(9, GPIO.BOTH, callback=rightPressed, bouncetime=50)
+GPIO.add_event_detect(9, GPIO.BOTH, callback=redPressed, bouncetime=50)
 
 pygame.event.set_allowed([pygame.QUIT])
 
+cols = 16
+i2c_expander = 'PCF8574'
+address = 0x27
+lcd = CharLCD (i2c_expander, address)
+lcd.cursor_pos = (0, 5)
+lcd.write_string ("PACMAN")
+padding = ' ' * cols
+string = "BEAT THE HIGH SCORE " + str (config.g_highscore)
+string_padded = padding + string + padding
+count_string_max= len(string_padded)-cols+1
+
 while 1:
-    if pygame.event.get()[0].type == pygame.QUIT:
-        game.recordHighScore ()
-        g_highscore = str (game.getHighScore ())
-        exit ()
+    for event in pygame.event.get ():
+        if event.type == pygame.QUIT:
+            game.recordHighScore ()
+            g_highscore = str (game.getHighScore ())
+            exit ()
     game.__init__ (1, 0)
     screen.fill ((0, 0, 0))
     pygame.display.update ()
     displayLaunchScreen ()
     gameBoard = copy.deepcopy (originalGameBoard)
     count = 0
+    count_string = 0
     while game.running:
-       # GPIO.updateLCD ()
-        #if game.onLaunchScreen:
-           #count = GPIO.buttonWaitingPattern (count)
+        if count_string == count_string_max:
+            count_string=0
+        lcd.home()
+        string_display = string_padded[count_string:count_string + cols]
+        lcd.cursor_pos = (1, 0)
+        lcd.write_string (string_display)
+        time.sleep (0.2)
+        count_string+=1
         for event in pygame.event.get ():
             if event.type == pygame.QUIT:
                 game.recordHighScore ()
                 exit ()
-            if not game.onLaunchScreen:
-                game.update ()
+        if game.onLaunchScreen:
+            count = IO.buttonWaitingPattern (count)
+        else:
+            game.update ()
